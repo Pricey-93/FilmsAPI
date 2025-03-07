@@ -12,11 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Films.Application\Films.Application.csproj" />
+      <ProjectReference Include="..\Films.Contracts\Films.Contracts.csproj" />
     </ItemGroup>
 
 </Project>
