@@ -18,6 +18,12 @@ public class FilmRepository : IFilmRepository
         var film = _films.FirstOrDefault(f => f.Id == id);
         return Task.FromResult(film);
     }
+    
+    public Task<Film?> GetBySlugAsync(string slug)
+    {
+        var film = _films.FirstOrDefault(f => f.Slug == slug);
+        return Task.FromResult(film);
+    }
 
     public Task<IEnumerable<Film>> GetAllAsync()
     {
