@@ -30,7 +30,7 @@ public class FilmsController : ControllerBase
     {
         var film = Guid.TryParse(idOrSlug, out var id) 
             ? await _filmRepository.GetByIdAsync(id)
-            : await _filmRepository.GetBySlugAsync(slug: idOrSlug);
+            : await _filmRepository.GetBySlugAsync(idOrSlug);
         
         if (film is null)
         {
