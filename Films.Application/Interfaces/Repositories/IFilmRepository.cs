@@ -1,6 +1,6 @@
 using Films.Application.Models;
 
-namespace Films.Application.Interfaces;
+namespace Films.Application.Interfaces.Repositories;
 
 public interface IFilmRepository
 {

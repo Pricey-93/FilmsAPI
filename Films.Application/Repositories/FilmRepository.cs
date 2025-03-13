@@ -1,7 +1,7 @@
 using Dapper;
-using Films.Application.Interfaces;
 using Films.Application.Models;
 using Films.Application.Database;
+using Films.Application.Interfaces.Repositories;
 
 namespace Films.Application.Repositories;
 
