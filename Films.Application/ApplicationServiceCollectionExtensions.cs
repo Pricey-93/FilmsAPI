@@ -1,7 +1,10 @@
-using Films.Application.Database;
 using Microsoft.Extensions.DependencyInjection;
-using Films.Application.Interfaces;
+using Films.Application.Database;
+using Films.Application.Interfaces.Repositories;
+using Films.Application.Interfaces.Services;
 using Films.Application.Repositories;
+using Films.Application.Services;
+using FluentValidation;
 
 
 namespace Films.Application;
@@ -11,6 +14,8 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddSingleton<IFilmRepository, FilmRepository>();
+        services.AddSingleton<IFilmService, FilmService>();
+        services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Singleton);
         return services;
     }
 
