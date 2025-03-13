@@ -10,4 +10,5 @@ public interface IFilmRepository
     Task<IEnumerable<Film>> GetAllAsync();
     Task<bool> UpdateAsync(Film film);
     Task<bool> DeleteAsync(Guid id);
+    Task<bool> ExistsAsync(Guid id);
 }
