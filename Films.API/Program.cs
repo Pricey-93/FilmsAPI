@@ -1,4 +1,5 @@
 using Scalar.AspNetCore;
+using Films.API.Mapping;
 using Films.Application;
 using Films.Application.Database;
 
@@ -23,6 +24,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
 
 //start database
