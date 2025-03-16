@@ -42,7 +42,7 @@ public class FilmRepository : IFilmRepository
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
         
         var film = await connection.QuerySingleOrDefaultAsync<Film>(
-            new CommandDefinition("select * from film where id = @id", id)
+            new CommandDefinition("select * from film where id = @id", new { id })
             );
 
         if (film is null)
@@ -51,7 +51,7 @@ public class FilmRepository : IFilmRepository
         }
         
         var genres = await connection.QueryAsync<string>(
-            new CommandDefinition("select name from genre where film_id = @id", id)
+            new CommandDefinition("select name from genre where film_id = @id", new { id })
             );
 
         foreach (var genre in genres)
@@ -67,7 +67,7 @@ public class FilmRepository : IFilmRepository
         using var connection = await _dbConnectionFactory.CreateConnectionAsync();
         
         var film = await connection.QuerySingleOrDefaultAsync<Film>(
-            new CommandDefinition("select * from film where slug = @slug", slug)
+            new CommandDefinition("select * from film where slug = @slug", new { slug })
         );
 
         if (film is null)
@@ -76,7 +76,7 @@ public class FilmRepository : IFilmRepository
         }
         
         var genres = await connection.QueryAsync<string>(
-            new CommandDefinition("select name from genre where film_id = @id", film.Id)
+            new CommandDefinition("select name from genre where film_id = @id", new { id = film.Id })
         );
 
         foreach (var genre in genres)
@@ -114,14 +114,14 @@ public class FilmRepository : IFilmRepository
 
         await connection.ExecuteAsync(new CommandDefinition("""
                                                             delete from genre where film_id = @Id
-                                                            """, film.Id));
+                                                            """, new { id = film.Id }));
 
         foreach (var genre in film.Genres)
         {
             await connection.ExecuteAsync(new CommandDefinition("""
                                                                 insert into genre (film_id, name)
-                                                                values (@filmId, @Name)
-                                                                """, new { filmId = film.Id, name = genre }));
+                                                                values (@Id, @Name)
+                                                                """, new { Id = film.Id, Name = genre }));
         }
 
         var result = await connection.ExecuteAsync(new CommandDefinition("""
@@ -140,11 +140,11 @@ public class FilmRepository : IFilmRepository
 
         await connection.ExecuteAsync(new CommandDefinition("""
                                                             delete from genre where film_id = @Id
-                                                            """, id));
+                                                            """, new { id }));
         
         var result = await connection.ExecuteAsync(new CommandDefinition("""
                                                             delete from film where id = @Id
-                                                            """, id));
+                                                            """, new { id }));
         
         transaction.Commit();
         return result > 0;
@@ -156,6 +156,6 @@ public class FilmRepository : IFilmRepository
         
         return await connection.ExecuteScalarAsync<bool>(new CommandDefinition("""
                                                                                select count(1) from film where id = @id
-                                                                               """, id));
+                                                                               """, new { id }));
     }
 }
