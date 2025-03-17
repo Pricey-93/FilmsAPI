@@ -1,6 +1,6 @@
 namespace Films.Contracts.Responses;
 
-public record ValidationFailureResponse()
+public class ValidationFailureResponse()
 {
     public required IEnumerable<ValidationResponse> Errors { get; init; }
 }

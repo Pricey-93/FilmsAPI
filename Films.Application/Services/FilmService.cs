@@ -16,31 +16,31 @@ public class FilmService : IFilmService
         _filmValidator = filmValidator;
     }
 
-    public async Task<bool> CreateAsync(Film film)
+    public async Task<bool> CreateAsync(Film film, CancellationToken cToken)
     {
-        await _filmValidator.ValidateAndThrowAsync(film);
+        await _filmValidator.ValidateAndThrowAsync(film, cancellationToken: cToken);
         
-        return await _filmRepository.CreateAsync(film);
+        return await _filmRepository.CreateAsync(film, cToken);
     }
 
-    public Task<Film?> GetByIdAsync(Guid id)
+    public Task<Film?> GetByIdAsync(Guid id, CancellationToken cToken)
     {
-        return _filmRepository.GetByIdAsync(id);
+        return _filmRepository.GetByIdAsync(id, cToken);
     }
 
-    public Task<Film?> GetBySlugAsync(string slug)
+    public Task<Film?> GetBySlugAsync(string slug, CancellationToken cToken)
     {
-        return _filmRepository.GetBySlugAsync(slug);
+        return _filmRepository.GetBySlugAsync(slug, cToken);
     }
 
-    public Task<IEnumerable<Film>> GetAllAsync()
+    public Task<IEnumerable<Film>> GetAllAsync(CancellationToken cToken)
     {
-        return _filmRepository.GetAllAsync();
+        return _filmRepository.GetAllAsync(cToken);
     }
 
-    public async Task<Film?> UpdateAsync(Film film)
+    public async Task<Film?> UpdateAsync(Film film, CancellationToken cToken)
     {
-        await _filmValidator.ValidateAndThrowAsync(film);
+        await _filmValidator.ValidateAndThrowAsync(film, cancellationToken: cToken);
         
         var exists = await ExistsAsync(film.Id);
 
@@ -49,13 +49,13 @@ public class FilmService : IFilmService
             return null;
         }
         
-        await _filmRepository.UpdateAsync(film);
+        await _filmRepository.UpdateAsync(film, cToken);
         return film;
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cToken)
     {
-        return _filmRepository.DeleteAsync(id);
+        return _filmRepository.DeleteAsync(id, cToken);
     }
 
     public Task<bool> ExistsAsync(Guid id)
