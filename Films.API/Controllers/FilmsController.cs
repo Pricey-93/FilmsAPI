@@ -4,6 +4,7 @@ using Films.Application.Interfaces.Repositories;
 using Films.Application.Interfaces.Services;
 using Films.Contracts.Requests;
 using Films.Contracts.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Films.API.Controllers;
@@ -18,6 +19,7 @@ public class FilmsController : ControllerBase
         _filmService = filmService;
     }
 
+    [Authorize(AuthConstants.TrustedMemberPolicyName)]
     [HttpPost(ApiEndpoints.Films.Create)]
     public async Task<IActionResult> Create([FromBody] CreateFilmRequest request, CancellationToken cToken)
     {
@@ -54,6 +56,7 @@ public class FilmsController : ControllerBase
         return Ok(films.MapToResponse());
     }
 
+    [Authorize(AuthConstants.TrustedMemberPolicyName)]
     [HttpPut(ApiEndpoints.Films.Update)]
     public async Task<IActionResult> Update([FromRoute]Guid id, [FromBody]UpdateFilmRequest request, CancellationToken cToken)
     {
@@ -68,6 +71,7 @@ public class FilmsController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.AdminUserPolicyName)]
     [HttpDelete(ApiEndpoints.Films.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cToken)
     {
