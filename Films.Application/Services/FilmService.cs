@@ -8,11 +8,13 @@ namespace Films.Application.Services;
 public class FilmService : IFilmService
 {
     private readonly IFilmRepository _filmRepository;
+    private readonly IRatingRepository _ratingRepository;
     private readonly IValidator<Film> _filmValidator;
 
-    public FilmService(IFilmRepository filmRepository, IValidator<Film> filmValidator)
+    public FilmService(IFilmRepository filmRepository, IRatingRepository ratingRepository, IValidator<Film> filmValidator)
     {
         _filmRepository = filmRepository;
+        _ratingRepository = ratingRepository;
         _filmValidator = filmValidator;
     }
 
@@ -23,22 +25,22 @@ public class FilmService : IFilmService
         return await _filmRepository.CreateAsync(film, cToken);
     }
 
-    public Task<Film?> GetByIdAsync(Guid id, CancellationToken cToken)
+    public Task<Film?> GetByIdAsync(Guid id, Guid? userId, CancellationToken cToken)
     {
-        return _filmRepository.GetByIdAsync(id, cToken);
+        return _filmRepository.GetByIdAsync(id, userId, cToken);
     }
 
-    public Task<Film?> GetBySlugAsync(string slug, CancellationToken cToken)
+    public Task<Film?> GetBySlugAsync(string slug, Guid? userId, CancellationToken cToken)
     {
-        return _filmRepository.GetBySlugAsync(slug, cToken);
+        return _filmRepository.GetBySlugAsync(slug, userId, cToken);
     }
 
-    public Task<IEnumerable<Film>> GetAllAsync(CancellationToken cToken)
+    public Task<IEnumerable<Film>> GetAllAsync(Guid? userId, CancellationToken cToken)
     {
-        return _filmRepository.GetAllAsync(cToken);
+        return _filmRepository.GetAllAsync(userId, cToken);
     }
 
-    public async Task<Film?> UpdateAsync(Film film, CancellationToken cToken)
+    public async Task<Film?> UpdateAsync(Film film, Guid? userId, CancellationToken cToken)
     {
         await _filmValidator.ValidateAndThrowAsync(film, cancellationToken: cToken);
         
@@ -50,6 +52,17 @@ public class FilmService : IFilmService
         }
         
         await _filmRepository.UpdateAsync(film, cToken);
+
+        if (!userId.HasValue)
+        {
+            var rating = await _ratingRepository.GetRatingAsync(film.Id, cToken);
+            film.Rating = rating;
+            return film;
+        }
+        var ratings = await _ratingRepository.GetRatingAsync(film.Id, userId.Value, cToken);
+        
+        film.Rating = ratings.Rating;
+        film.UserRating = ratings.UserRating;
         return film;
     }
 

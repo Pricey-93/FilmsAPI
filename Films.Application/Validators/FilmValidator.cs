@@ -1,5 +1,4 @@
 using Films.Application.Interfaces.Repositories;
-using Films.Application.Interfaces.Services;
 using Films.Application.Models;
 using FluentValidation;
 
@@ -22,10 +21,10 @@ public class FilmValidator : AbstractValidator<Film>
             .WithMessage("This film already exists in the system");
     }
 
-    private async Task<bool> ValidateSlug(Film film, string slug, CancellationToken cancellationToken)
+    private async Task<bool> ValidateSlug(Film film, string slug, CancellationToken cancellationToken = default)
     {
         var existingFilm = await _filmRepository.GetBySlugAsync(slug);
-
+        
         if (existingFilm is not null)
         {
             return existingFilm.Id == film.Id;

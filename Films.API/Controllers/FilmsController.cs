@@ -1,11 +1,9 @@
-using Films.API.Mapping;
-using Films.Application.Interfaces;
-using Films.Application.Interfaces.Repositories;
-using Films.Application.Interfaces.Services;
-using Films.Contracts.Requests;
-using Films.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Films.API.Auth;
+using Films.API.Mapping;
+using Films.Application.Interfaces.Services;
+using Films.Contracts.Requests;
 
 namespace Films.API.Controllers;
 
@@ -36,9 +34,11 @@ public class FilmsController : ControllerBase
     [HttpGet(ApiEndpoints.Films.Get)]
     public async Task<IActionResult> Get([FromRoute] string idOrSlug, CancellationToken cToken)
     {
+        var userId = HttpContext.GetUserId();
+        
         var film = Guid.TryParse(idOrSlug, out var id) 
-            ? await _filmService.GetByIdAsync(id, cToken)
-            : await _filmService.GetBySlugAsync(idOrSlug, cToken);
+            ? await _filmService.GetByIdAsync(id, userId, cToken)
+            : await _filmService.GetBySlugAsync(idOrSlug, userId, cToken);
         
         if (film is null)
         {
@@ -51,7 +51,9 @@ public class FilmsController : ControllerBase
     [HttpGet(ApiEndpoints.Films.GetAll)]
     public async Task<IActionResult> GetAll(CancellationToken cToken)
     {
-        var films = await _filmService.GetAllAsync(cToken);
+        var userId = HttpContext.GetUserId();
+        
+        var films = await _filmService.GetAllAsync(userId, cToken);
 
         return Ok(films.MapToResponse());
     }
@@ -60,8 +62,10 @@ public class FilmsController : ControllerBase
     [HttpPut(ApiEndpoints.Films.Update)]
     public async Task<IActionResult> Update([FromRoute]Guid id, [FromBody]UpdateFilmRequest request, CancellationToken cToken)
     {
+        var userId = HttpContext.GetUserId();
+        
         var film = request.MapToFilm(id);
-        var updated = await _filmService.UpdateAsync(film, cToken);
+        var updated = await _filmService.UpdateAsync(film, userId, cToken);
         if (updated is null)
         {
             return NotFound();

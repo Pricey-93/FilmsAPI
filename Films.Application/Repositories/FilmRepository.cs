@@ -37,13 +37,20 @@ public class FilmRepository : IFilmRepository
         return result > 0;
     }
 
-    public async Task<Film?> GetByIdAsync(Guid id, CancellationToken cToken = default)
+    public async Task<Film?> GetByIdAsync(Guid id, Guid? userId, CancellationToken cToken = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(cToken);
         
         var film = await connection.QuerySingleOrDefaultAsync<Film>(
-            new CommandDefinition("select * from film where id = @id", new { id }, cancellationToken: cToken)
-            );
+            new CommandDefinition("""
+                                  select f.*, round(avg(r.rating), 1) as rating, myr.rating as user_rating
+                                  from film f 
+                                  left join rating r on f.id = r.film_id
+                                  left join rating myr on f.id = myr.film_id
+                                    and myr.user_id = @UserId
+                                  where id = @id
+                                  group by id, user_rating
+                                  """, new { id, userId }, cancellationToken: cToken));
 
         if (film is null)
         {
@@ -62,13 +69,20 @@ public class FilmRepository : IFilmRepository
         return film;
     }
     
-    public async Task<Film?> GetBySlugAsync(string slug, CancellationToken cToken = default)
+    public async Task<Film?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken cToken = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(cToken);
         
         var film = await connection.QuerySingleOrDefaultAsync<Film>(
-            new CommandDefinition("select * from film where slug = @slug", new { slug }, cancellationToken: cToken)
-        );
+            new CommandDefinition("""
+                                  select f.*, round(avg(r.rating), 1) as rating, myr.rating as user_rating
+                                  from film f 
+                                  left join rating r on f.id = r.film_id
+                                  left join rating myr on f.id = myr.film_id
+                                    and myr.user_id = @UserId
+                                  where slug = @Slug
+                                  group by id, user_rating
+                                  """, new { slug, userId }, cancellationToken: cToken));
 
         if (film is null)
         {
@@ -87,22 +101,30 @@ public class FilmRepository : IFilmRepository
         return film;
     }
 
-    public async Task<IEnumerable<Film>> GetAllAsync(CancellationToken cToken = default)
+    public async Task<IEnumerable<Film>> GetAllAsync(Guid? userId, CancellationToken cToken = default)
     {
         using var connection = await _dbConnectionFactory.CreateConnectionAsync(cToken);
         var films = await connection.QueryAsync(
             new CommandDefinition("""
                                   select f.*,
-                                  string_agg(g.name, ',') as genres
-                                  from film f left join genre g on f.id = g.film_id
-                                  group by id
-                                  """, cancellationToken: cToken));
+                                      string_agg(distinct g.name, ',') as genres,
+                                      round(avg(r.rating), 1) as rating,
+                                      myr.rating as user_rating
+                                  from film f 
+                                  left join genre g on f.id = g.film_id
+                                  left join rating r on f.id = r.film_id
+                                  left join rating myr on f.id = myr.film_id
+                                    and myr.user_id = @UserId
+                                  group by id, user_rating
+                                  """, new { userId }, cancellationToken: cToken));
 
         return films.Select(x => new Film
         {
             Id = x.id,
             Title = x.title,
             YearOfRelease = x.year_of_release,
+            Rating = (float?)x.rating,
+            UserRating = (int?)x.user_rating,
             Genres = Enumerable.ToList(x.genres.Split(','))
         });
     }
