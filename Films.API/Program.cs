@@ -1,6 +1,6 @@
 using System.Text;
-using Films.API;
 using Scalar.AspNetCore;
+using Films.API.Auth;
 using Films.API.Mapping;
 using Films.Application;
 using Films.Application.Database;
